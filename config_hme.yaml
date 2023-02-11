@@ -1,0 +1,93 @@
+# 实验名称
+experiment: "HME100K-decay-2e-5"
+
+# 随机种子
+seed: 20200814
+
+# 训练参数
+epoches: 90
+batch_size: 8
+workers: 0
+train_parts: 3
+valid_parts: 1
+valid_start: 60
+
+optimizer: Adadelta
+lr: 1
+lr_decay: cosine     # step  cosine
+step_ratio: 3
+step_decay: 10
+eps: 1e-6
+weight_decay: 2e-5
+beta: 0.9
+
+image_resize: True
+image_width: 1600
+image_height: 320
+image_channel: 1
+
+dropout: False
+dropout_ratio: 0.2
+relu: True
+gradient: 100
+gradient_clip: True
+use_label_mask: True
+
+# 训练数据
+train_image_path: '/dataset/HME100K/parallel_v0/origin/120/img_train_v2.1_120.pkl'
+train_label_path: '/dataset/HME100K/parallel_v0/origin/HYB_label/tal-hme-train_v2.1_HYB.pkl'
+eval_image_path: '/dataset/HME100K/parallel_v0/origin/120/img_valid_v2.1_120.pkl'
+eval_label_path: '/dataset/HME100K/parallel_v0/origin/HYB_label/tal-hme-valid_v2_HYB.pkl'
+
+word_path: '/dataset/HME100K/parallel_v0/origin/HYB_label/word_dict_v2_HYB.txt'
+
+struct_path: 'data/struct.txt'
+
+# 选择encoder
+encoder:
+  net: DenseNet
+  input_channels: 1
+  out_channels: 684
+
+resnet:
+  conv1_stride: 1
+
+densenet:
+  ratio: 16
+  growthRate: 24
+  reduction: 0.5
+  bottleneck: True
+  use_dropout: True
+
+# 使用的rnn cell
+decoder:
+  net: HCA_decoder_v4
+  cell: 'GRU'
+  input_size: 256
+  hidden_size: 256
+
+# attention 参数
+attention:
+  attention_dim: 512
+  word_conv_kernel: 1
+  struct_conv_kernel: 3
+  use_coverage: True
+
+# structure
+structure:
+  struct_dropout_ratio: 0
+  with_hidden: True
+
+# hybrid tree
+hybrid_tree:
+  threshold: 0.5
+
+# 训练权重存放路径
+optimizer_save: False
+checkpoint_dir: 'checkpoints'
+finetune: False
+continue_train: False
+pretrain: False
+checkpoint: ""
+# tensorboard路径
+log_dir: 'logs'

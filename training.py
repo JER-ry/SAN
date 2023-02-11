@@ -20,7 +20,7 @@ def train(params, model, optimizer, epoch, train_loader, writer=None):
 
             batch, time = labels.shape[:2]
             if not 'lr_decay' in params or params['lr_decay'] == 'cosine':
-                updata_lr(optimizer, epoch, batch_idx, len(train_loader), params['epoches'], params['lr'])
+                updata_lr(optimizer, epoch, batch_idx, len(train_loader), params['total_epochs'], params['lr'])
             optimizer.zero_grad()
 
             probs, loss = model(images, image_masks, labels, label_masks)
@@ -56,10 +56,11 @@ def train(params, model, optimizer, epoch, train_loader, writer=None):
                 writer.add_scalar('train/ExpRate', ExpRate, current_step)
                 writer.add_scalar('train/lr', optimizer.param_groups[0]['lr'], current_step)
 
-            pbar.set_description(f'Epoch: {epoch+1} train loss: {loss.item():.4f} word loss: {word_loss:.4f} '
-                                 f'struct loss: {struct_loss:.4f} parent loss: {parent_loss:.4f} '
-                                 f'kl loss: {kl_loss:.4f} WordRate: {word_right / length:.4f} '
-                                 f'structRate: {struct_right / length:.4f} ExpRate: {exp_right / cal_num:.4f}')
+            # pbar.set_description(f'Epoch: {epoch+1} train loss: {loss.item():.4f} word loss: {word_loss:.4f} '
+            #                      f'struct loss: {struct_loss:.4f} parent loss: {parent_loss:.4f} '
+            #                      f'kl loss: {kl_loss:.4f} WordRate: {word_right / length:.4f} '
+            #                      f'structRate: {struct_right / length:.4f} ExpRate: {exp_right / cal_num:.4f}')
+            pbar.set_description(f'Ep_{epoch+1} W_{word_right / length:.3f} S_{struct_right / length:.3f} E_{exp_right / cal_num:.3f}')
 
         if writer:
             writer.add_scalar('epoch/train_loss', loss_meter.mean, epoch+1)
@@ -79,7 +80,7 @@ def eval(params, model, epoch, eval_loader, writer=None):
 
     with tqdm(eval_loader, total=len(eval_loader)) as pbar, torch.no_grad():
 
-        for batch_idx, (images, image_masks, labels, label_masks) in enumerate(eval_loader):
+        for batch_idx, (images, image_masks, labels, label_masks) in enumerate(pbar):
 
             images, image_masks, labels, label_masks = images.to(device), image_masks.to(device), labels.to(
                 device), label_masks.to(device)
@@ -109,9 +110,10 @@ def eval(params, model, epoch, eval_loader, writer=None):
                 writer.add_scalar('eval/structRate', structRate, current_step)
                 writer.add_scalar('eval/ExpRate', ExpRate, current_step)
 
-            pbar.set_description(f'Epoch: {epoch + 1} eval loss: {loss.item():.4f} word loss: {word_loss:.4f} '
-                                 f'struct loss: {struct_loss:.4f} WordRate: {word_right / length:.4f} '
-                                 f'structRate: {struct_right / length:.4f} ExpRate: {exp_right / cal_num:.4f}')
+            # pbar.set_description(f'Epoch: {epoch + 1} eval loss: {loss.item():.4f} word loss: {word_loss:.4f} '
+            #                      f'struct loss: {struct_loss:.4f} WordRate: {word_right / length:.4f} '
+            #                      f'structRate: {struct_right / length:.4f} ExpRate: {exp_right / cal_num:.4f}')
+            pbar.set_description(f'Ep_{epoch+1} W_{word_right / length:.3f} S_{struct_right / length:.3f} E_{exp_right / cal_num:.3f}')
 
         if writer:
             writer.add_scalar('epoch/eval_loss', loss_meter.mean, epoch + 1)
