@@ -1,32 +1,22 @@
-import os
 import cv2
 import argparse
 import torch
 import json
+import glob
+import os
 from tqdm import tqdm
 
 from utils import load_config
 from infer.Backbone import Backbone
 from dataset import Words
 
-os.chdir(os.getcwd())
-
-parser = argparse.ArgumentParser(description="Spatial channel attention")
-parser.add_argument("--config", default="copy.yaml", type=str, help="配置文件路径")
-parser.add_argument(
-    "--image_path",
-    default="/home/jerry/ocr-for-edu/math-ocr/crop/crop_images",
-    type=str,
-    help="测试image路径",
-)
+parser = argparse.ArgumentParser()
+parser.add_argument("--working_dir", type=str)
 args = parser.parse_args()
 
-if not args.config:
-    print("请提供config yaml路径！")
-    exit(-1)
+os.chdir(os.path.dirname(os.path.abspath(__file__)))
 
-"""加载config文件"""
-params = load_config(args.config)
+params = load_config("copy.yaml")
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 params["device"] = device
@@ -39,8 +29,8 @@ params["words"] = words
 model = Backbone(params)
 model = model.to(device)
 
-state = torch.load(params["checkpoint"], map_location='cpu')
-model.load_state_dict(state['model'])
+state = torch.load(params["checkpoint"], map_location="cpu")
+model.load_state_dict(state["model"])
 
 model.eval()
 
@@ -97,21 +87,20 @@ def convert(nodeid, gtd_list):
 
 with torch.no_grad():
     result = {}
-    for item in tqdm(os.listdir(args.image_path)):
-        if item.endswith(".png") or item.endswith(".jpg") or item.endswith(".bmp"):
-            img = cv2.imread(args.image_path + "/" + item)
-            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-            image = torch.Tensor(img) / 255
-            image = image.unsqueeze(0).unsqueeze(0)
+    for item in tqdm(glob.glob(f"{args.working_dir}/cropped/*/*/*.jpg")):
+        img = cv2.imread(item)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+        image = torch.Tensor(img) / 255
+        image = image.unsqueeze(0).unsqueeze(0)
 
-            image_mask = torch.ones(image.shape)
-            image, image_mask = image.to(device), image_mask.to(device)
+        image_mask = torch.ones(image.shape)
+        image, image_mask = image.to(device), image_mask.to(device)
 
-            prediction = model(image, image_mask)
+        prediction = model(image, image_mask)
 
-            latex_list = convert(1, prediction)
-            latex_string = " ".join(latex_list)
-            result[item] = latex_string
+        latex_list = convert(1, prediction)
+        latex_string = " ".join(latex_list)
+        result[item.replace(f"{args.working_dir}/cropped/", "")[:-4]] = latex_string
 
-with open("result.json", "w") as f:
+with open(f"{args.working_dir}/ocr_result.json", "w") as f:
     json.dump(result, f, ensure_ascii=False)

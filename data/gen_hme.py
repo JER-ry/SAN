@@ -10,9 +10,9 @@ from pathlib import Path
 
 random.seed(0)
 
-# out_path = "/home/jerry/ocr-for-edu/math-ocr/SAN/data/hmini"
-out_path = "/home/jerry/ocr-for-edu/math-ocr/SAN/data/hme"
-word_ori_path = "/home/jerry/ocr-for-edu/math-ocr/SAN/data/word_ori.txt"
+# out_path = "data/hmini"
+out_path = "data/hme"
+word_ori_path = "data/word_ori.txt"
 data_path = "/home/jerry/ocr-for-edu/math-ocr/HME100K"
 
 excludes1 = [
@@ -343,12 +343,13 @@ def gen2(image_path, image_out, label_path, label_out):
     image_dict = {}
     label_dict = {}
     for item in tqdm(labels):
-        img = cv2.imread(os.path.join(image_path, item + ".jpg"))
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-        image_dict[item] = img
-        with open(os.path.join(label_path, item + ".txt")) as f:
-            lines = f.readlines()
-        label_dict[item] = lines
+        if os.path.exists(os.path.join(image_path, item + ".jpg")):
+            img = cv2.imread(os.path.join(image_path, item + ".jpg"))
+            img = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            image_dict[item] = img
+            with open(os.path.join(label_path, item + ".txt")) as f:
+                lines = f.readlines()
+            label_dict[item] = lines
     with open(image_out, "wb") as f, open(label_out, "wb") as f2:
         pkl.dump(image_dict, f)
         pkl.dump(label_dict, f2)

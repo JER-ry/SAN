@@ -28,12 +28,12 @@ gradient_clip: True
 use_label_mask: True
 
 # 训练数据
-train_image_path: "/openbayes/input/input1/train_image.pkl"
-train_label_path: "/openbayes/input/input1/train_label.pkl"
-eval_image_path: "/openbayes/input/input0/test_image.pkl"
-eval_label_path: "/openbayes/input/input0/test_label.pkl"
+train_image_path: "train_image.pkl"
+train_label_path: "train_label.pkl"
+eval_image_path: "test_image.pkl"
+eval_label_path: "test_label.pkl"
 
-word_path: "/openbayes/input/input1/word.txt"
+word_path: "data/word.txt"
 
 # 选择encoder
 encoder:
@@ -81,7 +81,7 @@ finetune: True
 checkpoint: "checkpoints/hme_best.pth"
 
 # tensorboard路径
-log_dir: "/openbayes/home/tf_dir"
+log_dir: "tf_dir"
 
 # modified
 epoch_offset_for_lr: 0
